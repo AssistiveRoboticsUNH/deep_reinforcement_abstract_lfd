@@ -1,6 +1,6 @@
-# model_trainer_omega.py
+# model_trainer.py
 # Madison Clark-Turner
-# 10/13/2017
+# 10/18/2017
 
 import numpy as np
 import tensorflow as tf 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
 	#################################
 
 	# define directory to read files from
-	path = "../tfrecords/tfrecords_balanced/"
+	path = "../../deep_q_network/tfrecords/tfrecords_balanced/"
 	
 	# generate list of filenames
 	filenames = [f for f in os.listdir(path) if isfile(join(path, f))]

@@ -1,0 +1,3 @@
+[submodule "ornithokrites"]
+	path = ornithokrites
+	url = https://github.com/tracek/Ornithokrites.git
