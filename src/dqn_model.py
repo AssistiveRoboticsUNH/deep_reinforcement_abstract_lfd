@@ -1,6 +1,6 @@
-# dqn_model_omega.py
+# dqn_model.py
 # Madison Clark-Turner
-# 10/13/2017
+# 10/18/2017
 
 # helper function for printing tensor size
 from __future__ import print_function
@@ -9,7 +9,7 @@ import tensorflow as tf
 import numpy as np
 
 # incpetion network
-from models.slim.nets.inception_resnet_v2 import inception_resnet_v2
+from inception_resnet_v2 import *
 slim = tf.contrib.slim
 
 # contains information relating to input data size
