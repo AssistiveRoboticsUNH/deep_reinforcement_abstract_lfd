@@ -1,0 +1,14 @@
+<launch>
+	
+	<!-- +++++++++Setup Interface+++++++++ -->
+
+	<remap from="camera" to="nao_robot/camera/top/camera/image_raw"/>
+	<node name="asdinterface" pkg="asdinterface" type="asdinterface" output="screen" /> 
+	<node name="wave_nao_work" pkg="node_controllers" type="wave_nao_work" />
+
+	<!-- +++++++++Setup DQN+++++++++ -->
+	
+	<node name="action_selector" pkg="deep_reinforcement_abstract_lfd" type="dqn_action_selector.py" output="screen" />
+	<node name="dqn_executor" pkg="deep_reinforcement_abstract_lfd" type="dqn_executor" output="screen" />
+
+</launch>
