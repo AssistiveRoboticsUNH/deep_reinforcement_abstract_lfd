@@ -1,4 +1,5 @@
 # Deep Reinforcement Leanring of Abstract Reasoning from Demonstrations
+Madison Clark-Turner
 
 deep_reinforcement_abstract_lfd
 
