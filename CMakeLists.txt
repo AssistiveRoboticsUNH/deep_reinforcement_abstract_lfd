@@ -40,6 +40,6 @@ catkin_package(
 ## Executables ##
 #################
 
-add_executable(dqn_executor src/main.cpp src/dqn_executor.cpp src/executor.cpp)
-target_link_libraries(dqn_executor ${catkin_LIBRARIES})
-add_dependencies( dqn_executor ${PROJECT_NAME}_generate_messages_cpp )
+add_executable( dqn_executor_v2 src/main.cpp src/dqn_executor.cpp src/executor.cpp)
+target_link_libraries(dqn_executor_v2 ${catkin_LIBRARIES})
+add_dependencies( dqn_executor_v2 ${PROJECT_NAME}_generate_messages_cpp )

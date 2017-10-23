@@ -8,12 +8,12 @@
 # to return the next action that should be performed
 
 import rospy, rospkg
+from std_msgs.msg import Bool
 from std_srvs.srv import Empty
 
-from dqn_model import DQNModel
-filename = "ckpt_dir/model.ckpt"
+from dqn.dqn_model import DQNModel
 
-from packager import DQNPackager
+from dqn.packager import DQNPackager
 
 from deep_reinforcement_abstract_lfd.srv import *
 
@@ -44,17 +44,22 @@ def get_next_action(req):
 	return DQNGetNextActionResponse(next_act)
 
 def start_server(service_name, srv, func):
-	rospy.init_node(service_name)
 	s = rospy.Service(service_name, srv, func)
 	print "Service "+service_name+" is ready."
 	rospy.spin()
 
 if __name__ == '__main__':
-	
-	rospack = rospkg.RosPack()
-	path = rospack.get_path("deep_q_network")+'/';
-	model = DQNModel([1,1,1], batch_size=1, learning_rate=0.0001, filename=path+filename, log_dir="LOG_DIR")
+	rospy.init_node("dqn_action_selector")
+	pub_ready = rospy.Publisher("/dqn/ready", Bool, queue_size = 10)
+
+	#rospack = rospkg.RosPack()
+	#path = rospack.get_path("deep_reinforcement_abstract_lfd")+'/';
+
+	model = DQNModel([1,1,1], batch_size=1)
+
+	pub_ready.publish(Bool(True))
 	print "DQN Model ready"
+
 	packager = DQNPackager(model)
 	print "DQN Packager ready"
 

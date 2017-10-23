@@ -9,6 +9,17 @@
 	<!-- +++++++++Setup DQN+++++++++ -->
 	
 	<node name="action_selector" pkg="deep_reinforcement_abstract_lfd" type="dqn_action_selector.py" output="screen" />
-	<node name="dqn_executor" pkg="deep_reinforcement_abstract_lfd" type="dqn_executor" output="screen" />
+	<node name="dqn_executor" pkg="deep_reinforcement_abstract_lfd" type="dqn_executor_v2" output="screen" />
+
+	<!-- +++++++++Record+++++++++ -->
+	<node pkg="node_controllers" name="data_logger" type="data_logger" output="screen">
+		<param name="rosbag_record_args" 
+		   value="--output-prefix=nao_asd_auto 
+				/action_finished 
+				/nao_robot/microphone/naoqi_microphone/audio_raw 
+				/nao_robot/camera/top/camera/image_raw 
+			"/>
+		<param name="bag_path" value="$(env HOME)/bag"/>
+	</node>
 
 </launch>

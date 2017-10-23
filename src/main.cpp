@@ -8,7 +8,7 @@ Madison Clark-Turner
 #include <ros/package.h>
 #include <string>
 #include <iostream>
-#include "deep_reinforcement_abstract_lfd/dqn_executor.h"
+#include "../include/deep_reinforcement_abstract_lfd/dqn_executor.h"
 
 int main(int argc, char** argv){
 	ros::init(argc, argv, "dqn");

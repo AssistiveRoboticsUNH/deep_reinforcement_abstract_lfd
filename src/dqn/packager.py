@@ -6,7 +6,6 @@ import tensorflow as tf
 import numpy as np
 
 from constants import *
-import read_params
 
 import math
 import threading
@@ -59,9 +58,7 @@ class DQNPackager:
 
 		# variables for audio
 		self.counter = 0
-
-		pkg_name = read_params.Params(param_filename).ros_pkg_name
-		src_dir = rospkg.RosPack().get_path(pkg_name) + '/src/'
+		src_dir = rospkg.RosPack().get_path('deep_reinforcement_abstract_lfd') + '/src/dqn/'
 		self.__face_cascade = cv2.CascadeClassifier(src_dir+'haarcascade_frontalface_default.xml')
 		self.rate = 16000 # Sampling rate
 

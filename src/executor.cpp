@@ -4,7 +4,7 @@ Madison Clark-Turner
 10/14/2017
 */
 
-#include "deep_reinforcement_abstract_lfd/executor.h"
+#include "../include/deep_reinforcement_abstract_lfd/executor.h"
 
 Executor::Executor(ros::NodeHandle node): n(node)
 {	
