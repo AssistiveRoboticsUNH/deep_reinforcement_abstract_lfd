@@ -8,6 +8,7 @@ A description of our implementation along with both simulated results and live-s
 Installation
 =============
 
+Generate a bag file in the home dir
 Get the appropriate files
 Place files in the correct locations
 
@@ -39,51 +40,77 @@ roslaunch nao_bringup nao_full_py.launch
 roslaunch deep_reinforcement_abstract_lfd interface.launch
 ```
 
-The following interface will open
-
-<interface picture>
+![Robot Interface](doc/deep_reinforce_interface_anon.png)
   
 The following buttons perfom the following operations:
--**Start:** Places the robot into a position it can deliever the BI by stiffening teh robot's joints and angelling the robot's head.
--**Shut Down:** delivers the *Discriminitive Stimuli*
 
--**Command:** delivers the *Discriminitive Stimuli*
--**Prompt:** delivers the *Discriminitive Stimuli*
--**Reward:** delivers the *Discriminitive Stimuli*
--**Abort:** delivers the *Discriminitive Stimuli*
+System Functions
+- **Start:** Places the robot into a position it can deliever the BI and stiffens the robot's joints.
+- **Shut Down:** Closes the robot interface and ends listening ROS topics
 
+Action Functions
+- **Command:** delivers the *Discriminitive Stimuli* (SD)
+- **Prompt:** executes the *Prompt* (PMT) action
+- **Reward:** executes the *Reward* (REW) action
+- **Abort:** executes the *End Session* (END) action
 
+Recording Functions
+- **Start Record:** starts recording observations of the BI
+- **Stop Record:** stops recording observations of the BI and outputs the generated rosbag to the "~/bag" directory
+
+Stance Functions
+- **Stand:** places the robot in a standing stance
+- **Rest:** places the robot in a resting/crouching stance
+
+Utility Functions
+- **Angle Head:** angles the robot's head down so that the camera is focused on the participant
+- **Toggle Life:** disables autonomus life
+
+Autonomous Functions
+- **Run:** has the robot deliver the learned BI autonomously.
+
+When delivering the SD and PMT the robot will greet the participant by the name listed in the textbox. A live feed of what the robot observes is displayed in the interface and a clock displaying the current time (minutes and seconds) is provided for operations that require timing on the part of the system operator. When the system is initially started the "DQN Running" indicator will be red and the 'Run' button will be disabled. Once the DRQN has initalized its variables and is functioning the DQN indicator will turn green and the 'Run' button will be enabled. 
+
+To record training examples begin by selecting 'Start Record', then perform the desired function (e.g. the SD action followed by an observation period of several seconds, the REW action, and then the END action). Once the entire interaction has been observed select the 'Stop Record' button to generate a rosbag file (extension .bag) in the "~/bag" directory described in the installation instructions.
+
+Once a collection of rosbag demonstrations have been recorded the files can be converted to TFRecords using
+
+```
+python generate_tfrecord_from_rosbag.py
+```
 
 Training the DRQN
 --------------------
 
+To train the DRQN using we must need to first alter several inputs in a parameter file. Inside 'src/dqn/params_file.txt' are several parameters that influcence our model generation. 
 
+- CHECKPOINT_DIRECTORY = a prefix for the name of the directory in which to save the DRQN's internal values. If the directory does not exist the model will generate a new directory. If the directory does exist then the contents of the directory will be overwritten.
+- CHECKPOINT_NAME = the name for the checkpoint file to be saved
+- RESTORE_CHECKPOINT = the directory and name of the checkpoint file to be restored. If left blank the network will use randomized values to initialize the DRQN. When first training the network this option should be left blank.
+- LOG_DIR = A directory to store information about the DRQN network (most of this functionality is currently disabled)
+- TRAIN_DIR = the directory containing the TFRecord demonstrations to train the system. The path is relative to the current directory.
+- TEST_DIR = the directory containing the TFRecord demonstrations to evaluate the system. The path is relative to the current directory.
 
-
-Execution of Autonomous System
---------------------
-
-Data collection is performed by tele-operating the robot. 
-In order to train the network you must list the directory containing traing files in the form of TFRecords in: X
-
-While training the network our system will generate a checkpoint file every 10,000 iterations. You can train the model by executing:
+When first training the network make sure that CHECKPOINT_DIRECTORY, CHECKPOINT_NAME, and TRAIN_DIR are defined and that RESTORE_CHECKPOINT is left blank. Then execute
 
 ```
 python model_trainer.py
 ```
 
-Evaluation of a model can be performed by running 
- 
+The trainer will begin optimizing the network and will output timing information every iteration. The accuracy of the model on the test set will be printed every 10 iterations and the values of the model will be saved to the listed checkpoint file every 1,000 iterations. EVery 10,000 iterations the heckpoint_directory will change befre the finalized network values will be output in the directory suffixed by "_final"
+
+Once the network has trained the system can be evaluated by defining TEST_DIR and setting RESTORE_CHECKPOINT to list the directory and checkpoint name described when training the model. Executing 
+
 ```
 python evaluator.py
 ```
 
-The live system can be run after a checkpoint file has been generated by executing:
+provides simulated results of the system's accuracy.
 
-```
-  roslaunch nao_full_py.launch
-  roslaunch dqn.launch
-```
+Execution of Autonomous System
+--------------------
+
+The automated system an then be run on the robot using the same commands listed in the "Data Collection" section. Once the interface is open and the "DQN Running" indicator is lit the automated system can be executed by either selecting the 'Run' button or by pressing the NAO's left foot bumper.
 
 Dependencies
 =============
