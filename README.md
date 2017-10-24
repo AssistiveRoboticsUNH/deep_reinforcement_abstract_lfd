@@ -113,7 +113,7 @@ provides simulated results of the system's accuracy.
 Execution of Autonomous System
 --------------------
 
-The automated system an then be run on the robot using the same commands listed in the "Data Collection" section. Once the interface is open and the "DQN Running" indicator is lit the automated system can be executed by either selecting the 'Run' button or by pressing the NAO's left foot bumper.
+The automated system an then be run on the robot using the same commands listed in the [Data Collection](https://github.com/AssistiveRoboticsUNH/deep_reinforcement_abstract_lfd/blob/master/README.md#data-collection) section. Once the interface is open and the "DQN Running" indicator is lit the automated system can be executed by either selecting the 'Run' button or by pressing the NAO's left foot bumper.
 
 Dependencies
 =============
