@@ -8,7 +8,7 @@ A description of our implementation along with both simulated results and live-s
 Installation
 =============
 
-Once the dependencies have been installed download the contents of the GitHub repository into your "\~/catkin_ws/src" directory. In addition to the files located in the repository you will also need to download the [InceptionResNetV2.ckpt](http://download.tensorflow.org/models/inception_resnet_v2_2016_08_30.tar.gz) file from the given link in order to use the provided software. Move the downloaded checkpoint file to "\~/catkin_ws/src/deep_reinforcement_abstract_lfd/src/dqn/." or an equivalent directory. 
+Once the [dependencies](https://github.com/AssistiveRoboticsUNH/deep_reinforcement_abstract_lfd/blob/master/README.md#dependencies) have been installed download the contents of the GitHub repository into your "\~/catkin_ws/src" directory. In addition to the files located in the repository you will also need to download the [InceptionResNetV2.ckpt](http://download.tensorflow.org/models/inception_resnet_v2_2016_08_30.tar.gz) file from the given link in order to use the provided software. Move the downloaded checkpoint file to "\~/catkin_ws/src/deep_reinforcement_abstract_lfd/src/dqn/." or an equivalent directory. 
 
 Finally run the following command to generate storage directories
 ```
