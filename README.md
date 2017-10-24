@@ -8,7 +8,7 @@ A description of our implementation along with both simulated results and live-s
 Installation
 =============
 
-Once the dependencies have been installed download the contents of the GitHub repository into your "~/catkin_ws/src" directory. In addition to the files located in the repository you will also need to download the InceptionResNetV2.ckpt file from the given link in order to use the provided software. Move the checkpoint file to "~/catkin_ws/src/deep_reinforcement_abstract_lfd/src/dqn/." or an equivalent directory. 
+Once the dependencies have been installed download the contents of the GitHub repository into your "\~/catkin_ws/src" directory. In addition to the files located in the repository you will also need to download the InceptionResNetV2.ckpt file from the given link in order to use the provided software. Move the checkpoint file to "\~/catkin_ws/src/deep_reinforcement_abstract_lfd/src/dqn/." or an equivalent directory. 
 
 Finally run the following command to generate storage directories
 ```
