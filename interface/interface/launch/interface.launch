@@ -1,0 +1,4 @@
+<launch>
+	<node name="interface" pkg="interface" type="interface" output="screen" />
+	<node name="nao_wave" pkg="interface_ros_functions" type="wave_nao_right_hand" />
+</launch>

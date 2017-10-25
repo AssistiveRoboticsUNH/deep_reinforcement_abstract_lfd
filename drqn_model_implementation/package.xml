@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>deep_reinforcement_abstract_lfd</name>
+  <version>1.0.0</version>
+  <description>The deep_reinforcement_abstract_lfd package</description>
+
+  <maintainer email="mbc2004@cs.unh.edu">Madison Clark-Turner</maintainer>
+  <author email="mbc2004@cs.unh.edu">Madison Clark-Turner</author>
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>BSD</license>
+
+  <!--Dependencies-->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>nao_bridge_msgs</depend>
+  <depend>message_generation</depend>
+  <depend>message_runtime</depend>
+
+  <depend>opencv2</depend>
+  <depend>cv_bridge</depend>
+
+</package>
+
+

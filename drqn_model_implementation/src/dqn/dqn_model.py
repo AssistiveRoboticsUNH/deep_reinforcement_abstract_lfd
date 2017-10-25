@@ -9,8 +9,8 @@ import tensorflow as tf
 import numpy as np
 import os
 
-# incpetion network
-from inception_resnet_v2 import *
+# incpetion network (updated 10/25/2017)
+import inception_resnet_v2 as inception_resnet_v2
 slim = tf.contrib.slim
 
 # contains information relating to input data size
@@ -35,6 +35,7 @@ aud_filter_sizes = [(8,3),(4,3),(8,3)]
 aud_stride_sizes = [(4,1),(2,1),(4,1)]
 aud_padding_size = [(2,0),(1,0),(2,1)]
 
+DEVICE = '/gpu:0'
 
 TOTAL_PARAMS = 3
 
@@ -58,12 +59,16 @@ class DQNModel:
 			(1e-5 by default)
 	'''
 	def __init__(self, graphbuild = [1]*TOTAL_PARAMS, batch_size=1, filename=PARAMS_FILE, 
-					name="dqn", learning_rate=1e-5):
+					name="dqn", learning_rate=1e-5, inception_ckpt="", model_ckpt=""):
 		self.graphbuild = graphbuild 
 		self.__batch_size = batch_size
 		self.__name = name
 		self.__alpha = learning_rate
 		self.params = Params(filename)
+		if(len(inception_ckpt) == 0):
+			inception_ckpt = os.path.join(self.params.irnv2_checkpoint_dir, self.params.irnv2_checkpoint)
+		if(len(model_ckpt) == 0):
+			model_ckpt = self.params.restore_file
 		
 		#---------------------------------------
 		# Model variables
@@ -194,6 +199,7 @@ class DQNModel:
 		self.variables_img = {}
 
 		# restore all non-excluded variables from the INRV2 checkpoint
+		init_transfer_learning = None
 		variables_to_restore = []
 		if(self.graphbuild[0]):
 			for var in slim.get_model_variables():
@@ -208,9 +214,9 @@ class DQNModel:
 				if not excluded:
 					variables_to_restore.append(var)
 
-			slim.assign_from_checkpoint_fn(
-					self.params.irnv2_checkpoint,
-					variables_to_restore)
+			init_transfer_learning = slim.assign_from_checkpoint_fn(
+					inception_ckpt, variables_to_restore)
+
 
 		# we only need to train the last FC layer so we can remove the other checkpoint variables
 		# from our list of trainable variables
@@ -273,10 +279,14 @@ class DQNModel:
 		#---------------------------------------
 
 		# Generate Session
-		self.sess = tf.InteractiveSession()
+		self.sess = tf.InteractiveSession(config=tf.ConfigProto(allow_soft_placement = True))
 
 		# Variable for generating a save checkpoint
 		self.saver = tf.train.Saver()
+
+		# initalize IRNV2 variables
+		if(init_transfer_learning):
+				init_transfer_learning(self.sess)
 
 		if(len(self.params.restore_file) == 0):
 			# initalize all model variables
@@ -285,9 +295,8 @@ class DQNModel:
 			print("VARIABLE VALUES INITIALIZED")
 		else:
 			# restore variables from a checkpoint
-			self.saver.restore(self.sess, self.params.restore_file)
-			# if can't restore variables I may need to include the rospkg path (see dqn_action_selector.py)
-			print("VARIABLE VALUES RESTORED FROM: "+ self.params.restore_file)
+			self.saver.restore(self.sess, model_ckpt)
+			print("VARIABLE VALUES RESTORED FROM: "+ model_ckpt)
 
 		#---------------------------------------
 		# Summary Functions
@@ -493,9 +502,12 @@ class DQNModel:
 
 		def convolve_data_inception(input_data, val, n, dtype):
 			# pass data into the INRV2 Network
-			data = tf.reshape(input_data, [-1, 299, 299, 3])
-			logits, end_points = inception_resnet_v2(data, num_classes=output_sizes[-1]*output_sizes[-1]*layer_elements[-2], is_training=False, reuse=incep_reuse)
-			return logits		
+			with slim.arg_scope(inception_resnet_v2.inception_resnet_v2_arg_scope()):
+				data = tf.reshape(input_data, [-1, 299, 299, 3])
+				logits, _ = inception_resnet_v2.inception_resnet_v2(data, 
+						num_classes=output_sizes[-1]*output_sizes[-1]*layer_elements[-2], 
+						is_training=False, reuse=incep_reuse)
+				return logits		
 		
 		def convolve_data_3layer_pnt(input_data, val, variables, n, dtype):
 			# pass data into through P_CNN 
@@ -514,7 +526,8 @@ class DQNModel:
 				input_data = pad_tf(input_data, padding_size[i])
 				padding = "VALID"
 
-				input_data = gen_convolved_output(input_data, variables["W"+si], variables["b"+si], stride_sizes[i], layer_elements[i+1], output_sizes[i], train_ph, padding)
+				input_data = gen_convolved_output(input_data, variables["W"+si], variables["b"+si], 
+						stride_sizes[i], layer_elements[i+1], output_sizes[i], train_ph, padding)
 				#self.variable_summaries(input_data, dtype["name"]+"_conv"+si)
 				input_data = check_legal_inputs(input_data, "conv"+si+"_"+n)
 
@@ -537,7 +550,8 @@ class DQNModel:
 				input_data = pad_tf(input_data, aud_padding_size[i])
 				padding = "VALID"
 
-				input_data = gen_convolved_output(input_data, variables["W"+si], variables["b"+si], aud_stride_sizes[i], aud_layer_elements[i+1], aud_output_sizes[i], train_ph, padding)
+				input_data = gen_convolved_output(input_data, variables["W"+si], variables["b"+si], aud_stride_sizes[i], 
+						aud_layer_elements[i+1], aud_output_sizes[i], train_ph, padding)
 				#self.variable_summaries(input_data, dtype["name"]+"_conv"+si)
 				input_data = check_legal_inputs(input_data, "conv"+si+"_"+n)
 
@@ -556,50 +570,54 @@ class DQNModel:
 		inp_data = [0]*TOTAL_PARAMS
 		conv_inp = [0]*TOTAL_PARAMS
 
-		# Inception Network (INRV2)
-		if(self.graphbuild[0]):
-			val = 0
-			inp_data[val] = process_vars(img_ph, img_dtype)
-			conv_inp[val] = convolve_data_inception(inp_data[val], val, "img", img_dtype)
-		
-		with variable_scope as scope:
+		with tf.device(DEVICE):
+			# Inception Network (INRV2)
+			if(self.graphbuild[0]):
+				val = 0
+				inp_data[val] = process_vars(img_ph, img_dtype)
+				conv_inp[val] = convolve_data_inception(inp_data[val], val, "img", img_dtype)
 			
-			# P_CNN
-			if(self.graphbuild[1]):
-				val = 1
-				inp_data[val] = process_vars(pnt_ph, pnt_dtype)
-				conv_inp[val] = convolve_data_3layer_pnt(inp_data[val], val, var_pnt, "pnt", pnt_dtype)
-			
-			# A_CNN
-			if(self.graphbuild[2]):
-				val = 2
-				inp_data[val] = process_vars(aud_ph, aud_dtype)
-				conv_inp[val] = convolve_data_3layer_aud(inp_data[val], val, var_aud, "aud", aud_dtype)
+			with variable_scope as scope:
+				
+				# P_CNN
+				if(self.graphbuild[1]):
+					val = 1
+					inp_data[val] = process_vars(pnt_ph, pnt_dtype)
+					conv_inp[val] = convolve_data_3layer_pnt(inp_data[val], val, var_pnt, "pnt", pnt_dtype)
+				
+				# A_CNN
+				if(self.graphbuild[2]):
+					val = 2
+					inp_data[val] = process_vars(aud_ph, aud_dtype)
+					conv_inp[val] = convolve_data_3layer_aud(inp_data[val], val, var_aud, "aud", aud_dtype)
 
-			#---------------------------------------
-			# Combine Output of CNN Stacks
-			#---------------------------------------
-			combined_data = None
-			for i in range(TOTAL_PARAMS):
+				#---------------------------------------
+				# Combine Output of CNN Stacks
+				#---------------------------------------
+				combined_data = None
+				for i in range(TOTAL_PARAMS):
 
-				if(self.graphbuild[i]):
-					if(i < 2):
-						conv_inp[i] = tf.reshape(conv_inp[i], [self.__batch_size, -1, output_sizes[-1]*output_sizes[-1]*layer_elements[-2]], name="combine_reshape")
-					else:
-						conv_inp[i] = tf.reshape(conv_inp[i], [self.__batch_size, -1, aud_output_sizes[-1][0]*aud_output_sizes[-1][0]*aud_layer_elements[-2]], name="combine_reshape_aud")
-					
-					if(combined_data == None):
-						combined_data = conv_inp[i]
-					else:
-						combined_data = tf.concat([combined_data, conv_inp[i]], 2)
+					if(self.graphbuild[i]):
+						if(i < 2):
+							conv_inp[i] = tf.reshape(conv_inp[i], [self.__batch_size, -1, 
+									output_sizes[-1]*output_sizes[-1]*layer_elements[-2]], name="combine_reshape")
+						else:
+							conv_inp[i] = tf.reshape(conv_inp[i], [self.__batch_size, -1, 
+									aud_output_sizes[-1][0]*aud_output_sizes[-1][0]*aud_layer_elements[-2]], name="combine_reshape_aud")
+						
+						#conv_inp[i] = tf.nn.softmax(conv_inp[i]) <-- normalize inputs across CNN stacks
+						if(combined_data == None):
+							combined_data = conv_inp[i]
+						else:
+							combined_data = tf.concat([combined_data, conv_inp[i]], 2)
 
-					combined_data = check_legal_inputs(combined_data, "combined_data")
-								
-			# capture variables before changing scope 
-			W_lstm = var_lstm["W_lstm"]
-			b_lstm = var_lstm["b_lstm"]
-			W_fc = var_lstm["W_fc"]
-			b_fc = var_lstm["b_fc"]		
+						combined_data = check_legal_inputs(combined_data, "combined_data")
+									
+				# capture variables before changing scope 
+				W_lstm = var_lstm["W_lstm"]
+				b_lstm = var_lstm["b_lstm"]
+				W_fc = var_lstm["W_fc"]
+				b_fc = var_lstm["b_fc"]		
 		
 		with variable_scope2 as scope:
 			#---------------------------------------

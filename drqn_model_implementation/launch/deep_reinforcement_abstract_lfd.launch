@@ -3,8 +3,8 @@
 	<!-- +++++++++Setup Interface+++++++++ -->
 
 	<remap from="camera" to="nao_robot/camera/top/camera/image_raw"/>
-	<node name="asdinterface" pkg="asdinterface" type="asdinterface" output="screen" /> 
-	<node name="wave_nao_work" pkg="node_controllers" type="wave_nao_work" />
+	<node name="interface" pkg="interface" type="interface" output="screen" /> 
+	<node name="nao_wave" pkg="interface_ros_functions" type="wave_nao_right_hand" />
 
 	<!-- +++++++++Setup DQN+++++++++ -->
 	
@@ -12,7 +12,7 @@
 	<node name="dqn_executor" pkg="deep_reinforcement_abstract_lfd" type="dqn_executor_v2" output="screen" />
 
 	<!-- +++++++++Record+++++++++ -->
-	<node pkg="node_controllers" name="data_logger" type="data_logger" output="screen">
+	<node pkg="interface_ros_functions" name="data_logger" type="data_logger" output="screen">
 		<param name="rosbag_record_args" 
 		   value="--output-prefix=nao_asd_auto 
 				/action_finished 

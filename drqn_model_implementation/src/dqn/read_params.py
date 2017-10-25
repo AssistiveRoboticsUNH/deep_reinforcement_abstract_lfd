@@ -19,6 +19,8 @@ class Params():
 						self.save_dir = split[2]
 					if(split[0] == "CHECKPOINT_NAME"):
 						self.model_name = split[2]
+					if(split[0] == "IRNV2_CHECKPOINT_DIR"):
+						self.irnv2_checkpoint_dir = split[2]
 					if(split[0] == "IRNV2_CHECKPOINT"):
 						self.irnv2_checkpoint = split[2]
 						

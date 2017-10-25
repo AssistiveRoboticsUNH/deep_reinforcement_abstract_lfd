@@ -232,7 +232,7 @@ if __name__ == '__main__':
 		#---------------------------------------
 		if(iteration%1 == 0):
 			# print timing information
-			print(iteration, "total_time:", datetime.now()-ts_it, "prep_time:",prep_t, "switch_time:",switch_t, "optimization_time:",opt_t)
+			print(iteration, "total_time:", str(datetime.now()-ts_it), "prep_time:",str(prep_t), "switch_time:",str(switch_t), "optimization_time:",str(opt_t))
 		
 		if(iteration%100 == 0):
 			# evaluate system accuracy on train dataset

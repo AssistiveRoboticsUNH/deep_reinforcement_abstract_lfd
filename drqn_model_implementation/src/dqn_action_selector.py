@@ -10,6 +10,9 @@
 import rospy, rospkg
 from std_msgs.msg import Bool
 from std_srvs.srv import Empty
+import os
+from dqn.constants import *
+from dqn.read_params import Params
 
 from dqn.dqn_model import DQNModel
 
@@ -52,10 +55,14 @@ if __name__ == '__main__':
 	rospy.init_node("dqn_action_selector")
 	pub_ready = rospy.Publisher("/dqn/ready", Bool, queue_size = 10)
 
-	#rospack = rospkg.RosPack()
-	#path = rospack.get_path("deep_reinforcement_abstract_lfd")+'/';
+	rospack = rospkg.RosPack()
+	path = rospack.get_path("deep_reinforcement_abstract_lfd")+'/src/dqn/';
 
-	model = DQNModel([1,1,1], batch_size=1)
+	params = Params(path+PARAMS_FILE)
+
+	model = DQNModel([1,1,1], batch_size=1, filename=path+PARAMS_FILE,
+		inception_ckpt=path+params.irnv2_checkpoint_dir+'/'+params.irnv2_checkpoint,
+		model_ckpt=path+params.restore_file)
 
 	pub_ready.publish(Bool(True))
 	print "DQN Model ready"
