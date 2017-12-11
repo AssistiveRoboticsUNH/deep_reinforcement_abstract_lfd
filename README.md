@@ -1,5 +1,5 @@
 # Deep Reinforcement Learning of Abstract Reasoning from Demonstrations (deep_reinforcement_abstract_lfd)
-Madison Clark-Turner
+Author: Madison Clark-Turner
 
 The following repository contains a Deep Recurrent Q-Network (DRQN) architecture for the learning high-level human interactions from demonstrations (LfD). We specifically designed this network for use with an Applied Behavioral Analysis (ABA) styled social greeting behavioral intervention (BI). Our system collects demonstrations of the BI using a tele-operated robot and then extracts relevant features of the interaction in order to perform the intervention autonomously. The DRQN structure was designed using Tensorflow and integrated on a NAO humanoid robot using ROS. For the purposes of privacy we have excluded the raw demonstration data but include the tools to generate additional demonstration files.
 
@@ -12,7 +12,9 @@ Once the [dependencies](https://github.com/AssistiveRoboticsUNH/deep_reinforceme
 
 Finally run the following command to generate storage directories
 ```
-mkdir ~/bag ~/tfrecords ~/tfrecords/train ~/tfrecords/test
+mkdir ~/bag
+cd  ~/catkin_ws/src/deep_reinforcement_abstract_lfd
+mkdir tfrecords tfrecords/train tfrecords/test
 ```
 
 Usage
@@ -40,7 +42,7 @@ Operating the robot can be performed using our provided interface. The interface
 
 ```
 roslaunch nao_bringup nao_full_py.launch
-roslaunch deep_reinforcement_abstract_lfd interface.launch
+roslaunch deep_reinforcement_abstract_lfd deep_reinforcement_abstract_lfd.launch
 ```
 
 ![Robot Interface](doc/deep_reinforce_interface_anon.png)
@@ -124,6 +126,7 @@ The following libraries are used by this application:
 - [Librosa 0.5.1](https://librosa.github.io/librosa/index.html) - Music and audio analysis library
 - [ROS Indigo](http://wiki.ros.org/) - (Robot Operating System) Robotics library
 - [ROS naoqi](https://github.com/ros-naoqi/nao_robot.git) - ROS interface for NAO
+- [Qt](https://www.qt.io/) - GUI
 
 Acknowledgements
 =============
