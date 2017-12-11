@@ -11,7 +11,7 @@ IRNV2_CHECKPOINT = inception_resnet_v2_2016_08_30.ckpt
 
 # Model to restore from (e.g. "ckpt_final/model.ckpt")
 
-RESTORE_CHECKPOINT = 
+RESTORE_CHECKPOINT = ../../../../deep_q_network/src/hri_omega/omega_2/model.ckpt
 LOG_DIR = log
 
 # Location of TFRecords

@@ -1,6 +1,6 @@
 # dqn_model.py
 # Madison Clark-Turner
-# 10/18/2017
+# 12/11/2017
 
 # helper function for printing tensor size
 from __future__ import print_function
@@ -286,7 +286,7 @@ class DQNModel:
 
 		# initalize IRNV2 variables
 		if(init_transfer_learning):
-				init_transfer_learning(self.sess)
+			init_transfer_learning(self.sess)
 
 		if(len(self.params.restore_file) == 0):
 			# initalize all model variables
@@ -507,7 +507,7 @@ class DQNModel:
 				logits, _ = inception_resnet_v2.inception_resnet_v2(data, 
 						num_classes=output_sizes[-1]*output_sizes[-1]*layer_elements[-2], 
 						is_training=False, reuse=incep_reuse)
-				return logits		
+			return logits		
 		
 		def convolve_data_3layer_pnt(input_data, val, variables, n, dtype):
 			# pass data into through P_CNN 
@@ -605,7 +605,6 @@ class DQNModel:
 							conv_inp[i] = tf.reshape(conv_inp[i], [self.__batch_size, -1, 
 									aud_output_sizes[-1][0]*aud_output_sizes[-1][0]*aud_layer_elements[-2]], name="combine_reshape_aud")
 						
-						#conv_inp[i] = tf.nn.softmax(conv_inp[i]) <-- normalize inputs across CNN stacks
 						if(combined_data == None):
 							combined_data = conv_inp[i]
 						else:
