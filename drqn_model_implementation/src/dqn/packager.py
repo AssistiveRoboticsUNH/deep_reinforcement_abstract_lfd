@@ -45,10 +45,8 @@ class DQNPackager:
 		# dqn model
 		self.__dqn = dqn
 		self.__flip = flip
-		self.p = 0
 
 		# variables for tracking images received
-		self.__most_recent_act = -1
 		self.__lock = threading.Lock()
 		self.reset()
 
@@ -87,9 +85,6 @@ class DQNPackager:
 	# Collect Data into Frames #
 	############################
 
-	def setPrint(self,p):
-		self.p = p
-
 	def clearMsgs(self):
 		self.__recent_msgs = [False]*2
 
@@ -106,11 +101,6 @@ class DQNPackager:
 
 		if(not already_locked):	
 			self.__lock.release()
-		#print("reset complete")
-
-	def actCallback(self, msg):
-		self.__most_recent_act = msg.data
-		return
 
 	def imgCallback(self, msg):
 		self.__recent_msgs[0] = msg
@@ -136,8 +126,7 @@ class DQNPackager:
 		if False in self.__recent_msgs:
 			self.__lock.release()
 			return
-		if(self.p):
-			print("FRAME ADDED!")
+		
 		#organize and send data
 		img = self.__recent_msgs[0]
 		aud = self.formatAudMsg(self.__recent_msgs[1]) # process all audio data together prior to sending
@@ -214,11 +203,10 @@ class DQNPackager:
 
 	def formatOpt(self, img_src):
 		# generate optical flow
+		mod = pnt_dtype["cmp_h"]/float(img_dtype["cmp_h"])
+		img = cv2.resize(img_src.copy(),None,fx=mod, fy=mod, interpolation=cv2.INTER_CUBIC)
 
-
-		img = img_src.copy()
-		empty = np.zeros(img.shape)
-		opt_img = empty
+		opt_img = np.zeros(img.shape)[..., 0]
 		
 		if(len(self.frame1)==0):
 			# if img is the first frame then set optical flow to be black screen
@@ -238,15 +226,7 @@ class DQNPackager:
 			opt_img = mag
 			self.prvs = next
 
-		#make image 3 channel in order to perform re-size operations
-		stack = np.dstack((opt_img, empty, empty))
-
-		#resize image
-		mod = pnt_dtype["cmp_h"]/float(img_dtype["cmp_h"])
-		opt_img_resized = cv2.resize(stack,None,fx=mod, fy=mod, interpolation=cv2.INTER_CUBIC)
-		#opt_img_resized = cv2.normalize(opt_img_resized,None,0,255,cv2.NORM_MINMAX) <----------------Should use this to normalize input, not the one on mag
-		
-		return np.asarray(opt_img_resized[...,0]).flatten()
+		return np.asarray(opt_img).flatten()
 
 	def formatAudBatch(self, aud_msg_array, name=""):
 		# perform pre-processing on the audio input
@@ -288,8 +268,11 @@ class DQNPackager:
 		frame_len = aud_dtype["cmp_w"]
 
 		#pad the entire spectrogram so that overlaps at either end do not fall out of bounds
+		min_val = np.nanmin(S)
 		empty = np.zeros((S.shape[0], 3))
+		empty.fill(min_val)
 		empty_end = np.zeros((S.shape[0], 8))
+		empty_end.fill(min_val)
 		S = np.concatenate((empty, S, empty_end), axis = 1)
 
 		split_data = np.zeros(shape=(num_frames, S.shape[0], frame_len),dtype=S.dtype)
