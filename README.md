@@ -125,7 +125,7 @@ The following libraries are used by this application:
 - [OpenCV2 2.4.8](https://opencv.org/) - Open Source image processing library
 - [Librosa 0.5.1](https://librosa.github.io/librosa/index.html) - Music and audio analysis library
 - [ROS Indigo](http://wiki.ros.org/) - (Robot Operating System) Robotics library
-- [ROS naoqi](https://github.com/ros-naoqi/nao_robot.git) - ROS interface for NAO
+- [ROS naoqi 2.1.2](https://github.com/ros-naoqi/nao_robot.git) - ROS interface for NAO (__Newer versions have proven problematic__)
 - [Qt](https://www.qt.io/) - GUI
 
 Acknowledgements
